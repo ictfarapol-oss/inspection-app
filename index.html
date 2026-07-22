@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه بازرسی ماهیانه سیستم‌ها</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="بازرسی سیستم‌ها">
+<meta name="theme-color" content="#204B43">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF1EC; --panel:#FFFFFF; --ink:#1F2A24; --ink-soft:#5A655D;
+    --line:#D9DED8; --line-strong:#B9C2B8;
+    --teal:#2F6F63; --teal-dark:#204B43; --teal-tint:#E4EEEB;
+    --amber:#B8792A; --amber-tint:#F5E9D6;
+    --red:#B23A32; --red-tint:#F5DEDB;
+    --steel:#3E5C76; --steel-tint:#E4E9EF;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:transparent;}
+  #root{font-family:'Vazirmatn',sans-serif;color:var(--ink);background:var(--paper);min-height:100vh;padding:20px;direction:rtl;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .app{max-width:920px;margin:0 auto;}
+
+  .brand{display:flex;align-items:center;gap:14px;background:var(--teal-dark);color:#F2F5F3;border-radius:var(--radius);padding:18px 22px;margin-bottom:14px;}
+  .brand-icon{flex:0 0 auto;width:42px;height:42px;}
+  .brand-text h1{margin:0;font-size:19px;font-weight:800;letter-spacing:.2px;}
+  .brand-text p{margin:2px 0 0;font-size:12.5px;color:#BFD3CC;font-weight:500;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:5px;flex-wrap:wrap;}
+  .tab-btn{flex:1;min-width:80px;text-align:center;padding:10px 8px;border:none;background:transparent;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;transition:.15s;}
+  .tab-btn.active{background:var(--teal);color:#fff;}
+  .tab-btn:not(.active):hover{background:var(--paper);color:var(--ink);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+  .card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;}
+  .card .hint{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);}
+
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px;}
+  .field-grid .full{grid-column:1/-1;}
+  label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+  input[type=text],input[type=tel],select,textarea{
+    width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line-strong);border-radius:8px;
+    padding:9px 11px;outline:none;transition:.15s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px var(--teal-tint);}
+  textarea{resize:vertical;min-height:64px;}
+
+  .serial-box{display:flex;align-items:center;justify-content:space-between;background:var(--steel-tint);border:1px dashed var(--steel);border-radius:8px;padding:9px 13px;margin-bottom:16px;font-size:12.5px;}
+  .serial-box b{color:var(--steel);font-family:'JetBrains Mono',monospace;font-size:13px;}
+
+  .jdate-row{display:flex;gap:8px;align-items:center;}
+  .jdate-row select{flex:1;}
+  .btn-today{flex:0 0 auto;}
+
+  .user-info-card{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;background:var(--teal-tint);border-radius:8px;padding:12px;}
+  .user-info-card div{font-size:12px;}
+  .user-info-card b{display:block;font-size:13px;color:var(--teal-dark);margin-top:2px;}
+
+  .item-row{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:9px;background:var(--paper);}
+  .item-num{flex:0 0 30px;height:30px;border-radius:7px;background:var(--teal-dark);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;}
+  .item-body{flex:1;min-width:0;}
+  .item-text{font-size:14px;font-weight:600;margin-bottom:9px;}
+  .status-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
+  .pill{font-family:inherit;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.12s;}
+  .pill.ok.selected{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .pill.warn.selected{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .pill.bad.selected{background:var(--red);border-color:var(--red);color:#fff;}
+  .note-input{width:100%;font-family:inherit;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 9px;}
+  .remove-item{flex:0 0 auto;background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:16px;padding:2px 4px;}
+  .remove-item:hover{color:var(--red);}
+
+  .add-item-inline{display:flex;gap:8px;margin-top:4px;}
+  .add-item-inline input{flex:1;}
+  .btn{font-family:inherit;font-weight:700;font-size:13.5px;border-radius:8px;border:none;cursor:pointer;padding:10px 18px;transition:.15s;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:var(--teal-dark);}
+  .btn-outline{background:#fff;border:1.5px solid var(--line-strong);color:var(--ink);}
+  .btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);}
+  .btn-ghost:hover{color:var(--red);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-sm{padding:6px 12px;font-size:12.5px;}
+  .btn-block{width:100%;}
+
+  .sig-box{border:1.5px dashed var(--line-strong);border-radius:10px;padding:16px;background:var(--paper);}
+  .sig-check{display:flex;align-items:flex-start;gap:9px;margin-bottom:14px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  .sig-check input{margin-top:3px;width:16px;height:16px;accent-color:var(--teal);cursor:pointer;}
+
+  .stamp{width:150px;height:150px;margin:14px auto 6px;position:relative;transform:rotate(-7deg);}
+  .stamp svg{width:100%;height:100%;}
+  .stamp-name{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:var(--teal-dark);}
+  .stamp-name b{font-size:12.5px;line-height:1.3;padding:0 20px;}
+  .stamp-name span{font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;}
+
+  .done-panel{text-align:center;padding:10px 0 4px;}
+  .done-panel h2{font-size:17px;margin-bottom:2px;}
+  .done-panel p{color:var(--ink-soft);font-size:13px;margin-top:0;}
+
+  .sub-row{border:1px solid var(--line);border-radius:9px;margin-bottom:9px;overflow:hidden;background:var(--paper);}
+  .sub-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;cursor:pointer;gap:10px;}
+  .sub-head:hover{background:var(--teal-tint);}
+  .sub-title{font-size:13.5px;font-weight:700;}
+  .sub-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .badges{display:flex;gap:6px;flex:0 0 auto;}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace;}
+  .badge.ok{background:var(--teal-tint);color:var(--teal-dark);}
+  .badge.warn{background:var(--amber-tint);color:var(--amber);}
+  .badge.bad{background:var(--red-tint);color:var(--red);}
+  .sub-detail{padding:0 15px 15px;border-top:1px solid var(--line);}
+  .detail-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px;}
+  .detail-item:last-child{border-bottom:none;}
+  .detail-note{color:var(--ink-soft);font-size:11.5px;margin-top:2px;}
+
+  .filters{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;}
+  .filters input{flex:1;min-width:140px;}
+
+  .empty{text-align:center;padding:30px 10px;color:var(--ink-soft);font-size:13px;}
+
+  .tpl-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:8px;background:var(--paper);}
+  .tpl-row span{flex:1;font-size:13.5px;font-weight:600;}
+  .tpl-order{display:flex;flex-direction:column;gap:2px;}
+  .tpl-order button{background:none;border:1px solid var(--line-strong);border-radius:5px;cursor:pointer;font-size:10px;padding:1px 5px;color:var(--ink-soft);}
+
+  .user-row{border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:9px;background:var(--paper);}
+  .user-row-head{display:flex;justify-content:space-between;align-items:center;}
+  .user-row-head b{font-size:14px;}
+  .user-row-meta{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;}
+  .user-row-meta b{color:var(--ink);font-weight:700;}
+
+  .lock-screen{text-align:center;padding:20px 10px;}
+  .lock-icon{width:52px;height:52px;margin:0 auto 14px;}
+  .pin-input{width:180px;margin:14px auto;text-align:center;font-size:22px;letter-spacing:10px;font-family:'JetBrains Mono',monospace;}
+  .pin-row{display:flex;flex-direction:column;align-items:center;}
+  .small-link{background:none;border:none;color:var(--teal);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:10px;margin-inline-start:12px;}
+
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--teal-dark);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:.25s;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  @media (max-width:560px){
+    .field-grid{grid-template-columns:1fr;}
+    .user-info-card{grid-template-columns:1fr;}
+    .brand-text h1{font-size:16.5px;}
+  }
+</style>
+</head>
+<body>
+<div id="root"><div class="empty">در حال بارگذاری…</div></div>
+
+<script>
+const ROOT = document.getElementById('root');
+
+/* ---------- helpers ---------- */
+function toFa(n){const d=['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];return String(n).replace(/[0-9]/g,x=>d[x]);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function gregorianToJalali(gy,gm,gd){
+  const g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334];
+  let gy2=(gm>2)?(gy+1):gy;
+  let days=355666+(365*gy)+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400)+gd+g_d_m[gm-1];
+  let jy=-1595+(33*Math.floor(days/12053));
+  days%=12053;
+  jy+=4*Math.floor(days/1461);
+  days%=1461;
+  if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365;}
+  let jm,jd;
+  if(days<186){jm=1+Math.floor(days/31);jd=1+(days%31);}
+  else{jm=7+Math.floor((days-186)/30);jd=1+((days-186)%30);}
+  return {jy,jm,jd};
+}
+const jMonths=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+function jalaliLabel(j){ return toFa(j.jd)+' '+jMonths[j.jm-1]+' '+toFa(j.jy); }
+function todayJalali(){
+  const t=new Date();
+  return gregorianToJalali(t.getFullYear(), t.getMonth()+1, t.getDate());
+}
+function daysInJalaliMonth(jm){ if(jm<=6) return 31; if(jm<=11) return 30; return 30; }
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function simpleHash(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++){ h=((h<<5)+h)+str.charCodeAt(i); h=h & h; }
+  return (h>>>0).toString(16);
+}
+
+/* ---------- storage ---------- */
+const DEFAULT_TEMPLATE=[
+  {id:uid(),text:'بررسی وضعیت سرور اصلی و سرویس‌های در حال اجرا'},
+  {id:uid(),text:'بررسی صحت پشتیبان‌گیری (بکاپ) و امکان بازیابی'},
+  {id:uid(),text:'بررسی به‌روزرسانی آنتی‌ویروس و وصله‌های امنیتی'},
+  {id:uid(),text:'بررسی عملکرد UPS و برق اضطراری'},
+  {id:uid(),text:'بررسی دمای اتاق سرور و تجهیزات خنک‌کننده'},
+  {id:uid(),text:'بررسی دسترسی‌ها و حساب‌های کاربری غیرفعال'},
+  {id:uid(),text:'بررسی فضای ذخیره‌سازی و هشدارهای دیسک'},
+  {id:uid(),text:'بررسی لاگ‌های سیستم و رخدادهای غیرعادی'},
+];
+
+async function loadJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem('inspApp_'+key);
+    return raw ? JSON.parse(raw) : fallback;
+  }catch(e){ return fallback; }
+}
+async function saveJSON(key, val){
+  try{ localStorage.setItem('inspApp_'+key, JSON.stringify(val)); return true; }
+  catch(e){ showToast('خطا در ذخیره‌سازی — حافظه مرورگر پر یا غیرفعال است'); return false; }
+}
+
+/* ---------- state ---------- */
+let state={
+  tab:'new', template:[], users:[], submissions:[], loading:true, form:null,
+  expandedSub:null, historyFilter:'', historyPinHash:null, historyUnlocked:false,
+  pinScreen:null, pinError:'',
+};
+
+function freshForm(){
+  const t=todayJalali();
+  return {
+    userId: state.users.length===1?state.users[0].id:'',
+    jy:t.jy, jm:t.jm, jd:t.jd,
+    items: state.template.map(t2=>({id:t2.id,text:t2.text,status:null,note:''})),
+    overallNotes:'', checked:false, submitted:null,
+  };
+}
+
+async function init(){
+  state.template = await loadJSON('template-items', DEFAULT_TEMPLATE);
+  state.users = await loadJSON('users', []);
+  state.submissions = await loadJSON('submissions', []);
+  state.historyPinHash = await loadJSON('history-pin-hash', null);
+  state.form = freshForm();
+  state.loading=false;
+  render();
+}
+
+function nextFormNo(jy,jm){
+  const period=jy+String(jm).padStart(2,'0');
+  const count=state.submissions.filter(s=>s.period===period).length;
+  return {no:'BZ-'+period+'-'+String(count+1).padStart(3,'0'), period};
+}
+
+/* ---------- render ---------- */
+function syncFormItemsFromTemplate(){
+  if(!state.form || state.form.submitted) return;
+  const f=state.form;
+  const byId={};
+  f.items.forEach(function(i){ byId[i.id]=i; });
+  const newItems = state.template.map(function(t){
+    const existing = byId[t.id];
+    return existing ? {id:t.id, text:t.text, status:existing.status, note:existing.note} : {id:t.id, text:t.text, status:null, note:''};
+  });
+  const templateIds = new Set(state.template.map(function(t){return t.id;}));
+  const extras = f.items.filter(function(i){ return !templateIds.has(i.id); });
+  f.items = newItems.concat(extras);
+}
+
+function render(){
+  if(state.loading){ ROOT.innerHTML='<div class="empty">در حال بارگذاری…</div>'; return; }
+
+  const active = document.activeElement;
+  let focusId=null, selStart=null, selEnd=null;
+  if(active && active.id && ROOT.contains(active)){
+    focusId=active.id;
+    if(typeof active.selectionStart === 'number'){ selStart=active.selectionStart; selEnd=active.selectionEnd; }
+  }
+
+  ROOT.innerHTML =
+    '<div class="app">'+
+      brandHTML()+
+      tabsHTML()+
+      (state.tab==='new' ? newFormHTML() : '')+
+      (state.tab==='manage' ? manageHTML() : '')+
+      (state.tab==='users' ? usersHTML() : '')+
+      (state.tab==='history' ? historyGateHTML() : '')+
+    '</div>';
+  bindEvents();
+
+  if(focusId){
+    const el=document.getElementById(focusId);
+    if(el){
+      el.focus();
+      if(selStart!==null && el.setSelectionRange){
+        try{ el.setSelectionRange(selStart, selEnd); }catch(e){}
+      }
+    }
+  }
+}
+
+function brandHTML(){
+  return '<div class="brand">'+
+    '<svg class="brand-icon" viewBox="0 0 48 48" fill="none">'+
+      '<rect x="8" y="4" width="32" height="40" rx="4" fill="#3A6459"/>'+
+      '<rect x="16" y="2" width="16" height="8" rx="2" fill="#E4EEEB"/>'+
+      '<path d="M15 20l4 4 9-9" stroke="#E4EEEB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '<path d="M15 30l4 4 9-9" stroke="#E4EEEB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>'+
+      '<line x1="14" y1="38" x2="30" y2="38" stroke="#E4EEEB" stroke-width="2" stroke-linecap="round" opacity=".4"/>'+
+    '</svg>'+
+    '<div class="brand-text"><h1>سامانه بازرسی ماهیانه سیستم‌ها</h1>'+
+    '<p>ثبت الکترونیک، بدون کاغذ — با امضای دیجیتال کاربر</p></div></div>';
+}
+
+function tabsHTML(){
+  const tabs=[['new','فرم بازرسی جدید'],['manage','آیتم‌های چک‌لیست'],['users','کاربران'],['history','🔒 تاریخچه']];
+  return '<div class="tabs">'+tabs.map(function(t){
+    return '<button class="tab-btn '+(state.tab===t[0]?'active':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>';
+  }).join('')+'</div>';
+}
+
+/* ---- new form tab ---- */
+function newFormHTML(){
+  if(state.form.submitted) return submittedHTML();
+  const f=state.form;
+  const no = nextFormNo(f.jy,f.jm).no;
+  const user = state.users.find(function(u){return u.id===f.userId;});
+  const allAnswered = f.items.length>0 && f.items.every(function(i){return i.status;});
+  const canSubmit = allAnswered && f.userId && f.checked;
+
+  if(state.users.length===0){
+    return '<div class="card"><h2>هنوز کاربری تعریف نشده</h2>'+
+      '<p class="hint">قبل از ثبت فرم، باید حداقل یک کاربر در تب «کاربران» تعریف کنید.</p>'+
+      '<button class="btn btn-primary" data-tab="users">رفتن به تب کاربران</button></div>';
+  }
+
+  const days=[]; for(let i=1;i<=daysInJalaliMonth(f.jm);i++) days.push(i);
+  const years=[]; const ty=todayJalali().jy; for(let y=ty-1;y<=ty+1;y++) years.push(y);
+
+  let html='<div class="card"><h2>مشخصات بازرسی</h2><p class="hint">اطلاعات کلی این دوره بازرسی را وارد کنید.</p>'+
+    '<div class="serial-box"><span>شماره فرم</span><b class="mono">'+no+'</b></div>'+
+    '<div class="field-grid">'+
+      '<div class="full"><label>کاربر</label><select id="f-user"><option value="">— انتخاب کنید —</option>'+
+      state.users.map(function(u){return '<option value="'+u.id+'" '+(f.userId===u.id?'selected':'')+'>'+escapeHtml(u.name)+'</option>';}).join('')+
+      '</select>';
+  if(user){
+    html+='<div class="user-info-card">'+
+      '<div>واحد<b>'+escapeHtml(user.unit||'—')+'</b></div>'+
+      '<div>آی‌پی<b class="mono">'+escapeHtml(user.ip||'—')+'</b></div>'+
+      '<div>تلفن داخلی<b class="mono">'+escapeHtml(user.ext||'—')+'</b></div></div>';
+  }
+  html+='</div>'+
+      '<div class="full"><label>تاریخ بازرسی (شمسی)</label><div class="jdate-row">'+
+        '<select id="f-jd">'+days.map(function(d){return '<option value="'+d+'" '+(f.jd===d?'selected':'')+'>'+toFa(d)+'</option>';}).join('')+'</select>'+
+        '<select id="f-jm">'+jMonths.map(function(m,i){return '<option value="'+(i+1)+'" '+(f.jm===i+1?'selected':'')+'>'+m+'</option>';}).join('')+'</select>'+
+        '<select id="f-jy">'+years.map(function(y){return '<option value="'+y+'" '+(f.jy===y?'selected':'')+'>'+toFa(y)+'</option>';}).join('')+'</select>'+
+        '<button class="btn btn-outline btn-sm btn-today" id="btn-today" type="button">امروز</button>'+
+      '</div></div>'+
+    '</div></div>';
+
+  html+='<div class="card"><h2>موارد چک‌لیست</h2><p class="hint">وضعیت هر آیتم را مشخص کرده و در صورت نیاز توضیح ثبت کنید.</p>'+
+    f.items.map(itemRowHTML).join('')+
+    '<div class="add-item-inline"><input type="text" id="new-item-text" placeholder="افزودن آیتم جدید فقط برای این فرم…">'+
+    '<button class="btn btn-outline btn-sm" id="add-inline-item">افزودن</button></div></div>';
+
+  html+='<div class="card"><h2>توضیحات کلی</h2>'+
+    '<textarea id="f-notes" placeholder="در صورت وجود، مشاهدات یا توضیحات تکمیلی را بنویسید…">'+escapeHtml(f.overallNotes)+'</textarea></div>';
+
+  html+='<div class="card"><h2>تایید و امضای دیجیتال</h2><p class="hint">پس از تکمیل تمام آیتم‌ها، فرم را تایید و امضا کنید.</p>'+
+    '<div class="sig-box"><label class="sig-check"><input type="checkbox" id="f-check" '+(f.checked?'checked':'')+'>'+
+    '<span>اینجانب موارد فوق را شخصاً بررسی کرده و صحت اطلاعات ثبت‌شده را تایید می‌کنم.</span></label>';
+  if(!allAnswered) html+='<div style="font-size:12px;color:var(--amber);font-weight:700;margin-bottom:10px;">⚠ برای ثبت نهایی، وضعیت همه آیتم‌ها را مشخص کنید.</div>';
+  if(!f.userId) html+='<div style="font-size:12px;color:var(--amber);font-weight:700;margin-bottom:10px;">⚠ کاربر را انتخاب کنید.</div>';
+  html+='<button class="btn btn-primary btn-block" id="submit-form" '+(canSubmit?'':'disabled')+'>ثبت نهایی و امضای فرم</button></div></div>';
+  return html;
+}
+
+function itemRowHTML(it,idx){
+  return '<div class="item-row" data-item-id="'+it.id+'">'+
+    '<div class="item-num mono">'+toFa(String(idx+1).padStart(2,'0'))+'</div>'+
+    '<div class="item-body"><div class="item-text">'+escapeHtml(it.text)+'</div>'+
+    '<div class="status-pills">'+
+      '<button class="pill ok '+(it.status==='ok'?'selected':'')+'" data-status="ok">سالم</button>'+
+      '<button class="pill warn '+(it.status==='warn'?'selected':'')+'" data-status="warn">نیاز به بررسی</button>'+
+      '<button class="pill bad '+(it.status==='bad'?'selected':'')+'" data-status="bad">خراب</button>'+
+    '</div>'+
+    '<input type="text" class="note-input" data-note placeholder="توضیح (اختیاری)" value="'+escapeHtml(it.note)+'"></div>'+
+    '<button class="remove-item" data-remove title="حذف آیتم از این فرم">✕</button></div>';
+}
+
+function submittedHTML(){
+  const s=state.form.submitted;
+  const c=countStatuses(s.items);
+  return '<div class="card done-panel"><h2>فرم با موفقیت ثبت شد ✅</h2>'+
+    '<p>شماره فرم: <b class="mono">'+s.no+'</b> — '+jalaliLabel(s.jdate)+'</p>'+
+    '<div class="stamp"><svg viewBox="0 0 150 150">'+
+      '<circle cx="75" cy="75" r="70" fill="none" stroke="#2F6F63" stroke-width="3"/>'+
+      '<circle cx="75" cy="75" r="60" fill="none" stroke="#2F6F63" stroke-width="1.5" stroke-dasharray="3 4"/></svg>'+
+      '<div class="stamp-name"><b>'+escapeHtml(s.inspector.name)+'<br>تایید شد</b>'+
+      '<span>'+jalaliLabel(s.jdate)+'</span></div></div>'+
+    '<div class="badges" style="justify-content:center;margin:14px 0;">'+
+      '<span class="badge ok">سالم '+toFa(c.ok)+'</span>'+
+      '<span class="badge warn">نیاز به بررسی '+toFa(c.warn)+'</span>'+
+      '<span class="badge bad">خراب '+toFa(c.bad)+'</span></div>'+
+    '<button class="btn btn-primary" id="start-new">ثبت بازرسی جدید</button></div>';
+}
+
+/* ---- manage items tab ---- */
+function manageHTML(){
+  let html='<div class="card"><h2>مدیریت آیتم‌های استاندارد چک‌لیست</h2>'+
+    '<p class="hint">این آیتم‌ها در تمام فرم‌های بازرسی جدید به‌صورت پیش‌فرض نمایش داده می‌شوند.</p>';
+  if(state.template.length===0) html+='<div class="empty">هنوز آیتمی اضافه نشده است.</div>';
+  else html+=state.template.map(function(it,idx){
+    return '<div class="tpl-row" data-tpl-id="'+it.id+'">'+
+      '<div class="tpl-order"><button data-move="up" '+(idx===0?'disabled':'')+'>▲</button>'+
+      '<button data-move="down" '+(idx===state.template.length-1?'disabled':'')+'>▼</button></div>'+
+      '<span>'+escapeHtml(it.text)+'</span>'+
+      '<button class="btn btn-ghost btn-sm" data-del-tpl>حذف</button></div>';
+  }).join('');
+  html+='<div class="add-item-inline" style="margin-top:10px;"><input type="text" id="new-tpl-text" placeholder="متن آیتم جدید…">'+
+    '<button class="btn btn-outline btn-sm" id="add-tpl-item">افزودن به لیست</button></div></div>';
+  return html;
+}
+
+/* ---- users tab ---- */
+function usersHTML(){
+  let html='<div class="card"><h2>مدیریت کاربران</h2>'+
+    '<p class="hint">هر کاربر تعریف‌شده در فرم بازرسی قابل انتخاب است و اطلاعاتش به‌طور خودکار نمایش داده می‌شود.</p>';
+  if(state.users.length===0) html+='<div class="empty">هنوز کاربری اضافه نشده است.</div>';
+  else html+=state.users.map(function(u){
+    return '<div class="user-row" data-user-id="'+u.id+'"><div class="user-row-head"><b>'+escapeHtml(u.name)+'</b>'+
+      '<button class="btn btn-ghost btn-sm" data-del-user>حذف</button></div>'+
+      '<div class="user-row-meta"><span>واحد: <b>'+escapeHtml(u.unit||'—')+'</b></span>'+
+      '<span>IP: <b class="mono">'+escapeHtml(u.ip||'—')+'</b></span>'+
+      '<span>داخلی: <b class="mono">'+escapeHtml(u.ext||'—')+'</b></span></div></div>';
+  }).join('');
+  html+='</div><div class="card"><h2>افزودن کاربر جدید</h2><div class="field-grid">'+
+    '<div><label>نام و نام خانوادگی</label><input type="text" id="nu-name" placeholder="مثلاً: علی محمدی"></div>'+
+    '<div><label>واحد</label><input type="text" id="nu-unit" placeholder="مثلاً: فناوری اطلاعات"></div>'+
+    '<div><label>آدرس IP</label><input type="text" id="nu-ip" placeholder="مثلاً: 192.168.1.20"></div>'+
+    '<div><label>تلفن داخلی</label><input type="text" id="nu-ext" placeholder="مثلاً: 145"></div></div>'+
+    '<button class="btn btn-primary" id="add-user" style="margin-top:10px;">افزودن کاربر</button></div>';
+  return html;
+}
+
+/* ---- history tab (gated) ---- */
+function historyGateHTML(){
+  if(!state.historyPinHash){
+    return '<div class="card lock-screen">'+lockIcon()+
+      '<h2>تعیین رمز دسترسی به تاریخچه</h2>'+
+      '<p class="hint">این بخش فقط با رمز عبور شما در دسترس است. یک رمز عددی (۴ تا ۶ رقم) تعیین کنید.</p>'+
+      '<div class="pin-row">'+
+      '<input type="tel" inputmode="numeric" class="pin-input" id="pin-new" placeholder="رمز جدید" maxlength="6">'+
+      '<input type="tel" inputmode="numeric" class="pin-input" id="pin-confirm" placeholder="تکرار رمز" maxlength="6">'+
+      (state.pinError?'<div style="color:var(--red);font-size:12.5px;margin-top:4px;">'+state.pinError+'</div>':'')+
+      '<button class="btn btn-primary" id="pin-save" style="margin-top:10px;">ذخیره رمز و ورود</button></div></div>';
+  }
+  if(!state.historyUnlocked){
+    return '<div class="card lock-screen">'+lockIcon()+
+      '<h2>تاریخچه بازرسی‌ها قفل است</h2>'+
+      '<p class="hint">این بخش فقط برای شما در نظر گرفته شده. رمز عبور را وارد کنید.</p>'+
+      '<div class="pin-row">'+
+      '<input type="tel" inputmode="numeric" class="pin-input" id="pin-try" placeholder="رمز عبور" maxlength="6" autofocus>'+
+      (state.pinError?'<div style="color:var(--red);font-size:12.5px;margin-top:4px;">'+state.pinError+'</div>':'')+
+      '<button class="btn btn-primary" id="pin-unlock" style="margin-top:10px;">ورود</button></div></div>';
+  }
+  return historyHTML();
+}
+function lockIcon(){
+  return '<svg class="lock-icon" viewBox="0 0 48 48" fill="none">'+
+    '<rect x="10" y="21" width="28" height="20" rx="4" fill="#2F6F63"/>'+
+    '<path d="M16 21v-6a8 8 0 0 1 16 0v6" stroke="#2F6F63" stroke-width="3.5" fill="none"/>'+
+    '<circle cx="24" cy="30" r="3" fill="#fff"/><rect x="22.5" y="30" width="3" height="7" fill="#fff"/></svg>';
+}
+
+function historyHTML(){
+  const q=state.historyFilter.trim();
+  let list=state.submissions.slice().reverse();
+  if(q) list=list.filter(function(s){return (s.inspector.name+s.no).toLowerCase().indexOf(q.toLowerCase())>-1;});
+  let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">'+
+    '<h2 style="margin:0;">تاریخچه بازرسی‌های ثبت‌شده</h2>'+
+    '<div><button class="small-link" id="change-pin">تغییر رمز</button>'+
+    '<button class="small-link" id="lock-again">قفل کردن</button></div></div>'+
+    '<div class="filters" style="margin-top:14px;"><input type="text" id="hist-filter" placeholder="جستجو بر اساس کاربر یا شماره فرم…" value="'+escapeHtml(state.historyFilter)+'"></div>';
+  if(list.length===0) html+='<div class="empty">هیچ بازرسی ثبت‌شده‌ای یافت نشد.</div>';
+  else html+=list.map(subRowHTML).join('');
+  html+='</div>';
+  if(state.pinScreen==='change') html+=changePinHTML();
+  html+='<div class="card">'+
+    '<h2>پشتیبان‌گیری از اطلاعات</h2>'+
+    '<p class="hint">چون اطلاعات فقط در حافظه همین مرورگر/گوشی ذخیره می‌شود، برای جلوگیری از گم‌شدن داده‌ها (مثلاً هنگام پاک شدن کش مرورگر یا تعویض گوشی) به‌طور منظم یک نسخه پشتیبان بگیرید.</p>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+      '<button class="btn btn-outline" id="export-backup">دانلود نسخه پشتیبان</button>'+
+      '<label class="btn btn-outline" style="cursor:pointer;">بازیابی از فایل پشتیبان'+
+        '<input type="file" id="import-backup" accept="application/json" style="display:none;"></label>'+
+    '</div>'+
+  '</div>';
+  return html;
+}
+
+function changePinHTML(){
+  return '<div class="card"><h2>تغییر رمز عبور</h2><div class="field-grid">'+
+    '<div><label>رمز فعلی</label><input type="tel" inputmode="numeric" id="cp-old" maxlength="6"></div>'+
+    '<div><label>رمز جدید</label><input type="tel" inputmode="numeric" id="cp-new" maxlength="6"></div></div>'+
+    (state.pinError?'<div style="color:var(--red);font-size:12.5px;margin:6px 0;">'+state.pinError+'</div>':'')+
+    '<button class="btn btn-primary btn-sm" id="cp-save" style="margin-top:6px;">ذخیره رمز جدید</button></div>';
+}
+
+function subRowHTML(s){
+  const c=countStatuses(s.items);
+  const open = state.expandedSub===s.id;
+  let html='<div class="sub-row"><div class="sub-head" data-toggle="'+s.id+'"><div>'+
+    '<div class="sub-title">'+escapeHtml(s.inspector.name)+' — <span class="mono">'+s.no+'</span></div>'+
+    '<div class="sub-sub">'+jalaliLabel(s.jdate)+'</div></div>'+
+    '<div class="badges"><span class="badge ok">'+toFa(c.ok)+'</span><span class="badge warn">'+toFa(c.warn)+'</span>'+
+    '<span class="badge bad">'+toFa(c.bad)+'</span></div></div>';
+  if(open){
+    html+='<div class="sub-detail">'+
+      '<div class="detail-item"><div>واحد کاربر</div><b>'+escapeHtml(s.inspector.unit||'—')+'</b></div>'+
+      '<div class="detail-item"><div>IP</div><b class="mono">'+escapeHtml(s.inspector.ip||'—')+'</b></div>'+
+      '<div class="detail-item"><div>تلفن داخلی</div><b class="mono">'+escapeHtml(s.inspector.ext||'—')+'</b></div>'+
+      s.items.map(function(it,idx){
+        return '<div class="detail-item"><div style="flex:1;">'+toFa(idx+1)+'. '+escapeHtml(it.text)+
+          (it.note?'<div class="detail-note">'+escapeHtml(it.note)+'</div>':'')+'</div>'+
+          '<span class="badge '+it.status+'">'+(it.status==='ok'?'سالم':it.status==='warn'?'نیاز به بررسی':'خراب')+'</span></div>';
+      }).join('')+
+      (s.overallNotes?'<div class="detail-note" style="margin-top:10px;"><b>توضیحات کلی: </b>'+escapeHtml(s.overallNotes)+'</div>':'')+
+      '<button class="btn btn-ghost btn-sm" data-del-sub="'+s.id+'" style="margin-top:8px;">حذف این رکورد</button></div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function countStatuses(items){ return items.reduce(function(a,i){a[i.status]=(a[i.status]||0)+1;return a;},{ok:0,warn:0,bad:0}); }
+
+/* ---------- events ---------- */
+function bindEvents(){
+  ROOT.querySelectorAll('[data-tab]').forEach(function(b){
+    b.onclick=function(){
+      state.tab=b.dataset.tab; state.pinError=''; state.pinScreen=null;
+      if(state.tab==='new') syncFormItemsFromTemplate();
+      render();
+    };
+  });
+
+  if(state.tab==='new' && !state.form.submitted && state.users.length>0){
+    const f=state.form;
+    const bindField=function(id,key){ const el=document.getElementById(id); if(el) el.oninput=function(){ f[key]=el.value; render(); }; };
+    bindField('f-notes','overallNotes');
+
+    const uSel=document.getElementById('f-user');
+    if(uSel) uSel.onchange=function(){ f.userId=uSel.value; render(); };
+
+    const jd=document.getElementById('f-jd'), jm=document.getElementById('f-jm'), jy=document.getElementById('f-jy');
+    if(jd) jd.onchange=function(){ f.jd=Number(jd.value); render(); };
+    if(jm) jm.onchange=function(){ f.jm=Number(jm.value); render(); };
+    if(jy) jy.onchange=function(){ f.jy=Number(jy.value); render(); };
+    const today=document.getElementById('btn-today');
+    if(today) today.onclick=function(){ const t=todayJalali(); f.jy=t.jy; f.jm=t.jm; f.jd=t.jd; render(); };
+
+    const chk=document.getElementById('f-check');
+    if(chk) chk.onchange=function(){ f.checked=chk.checked; render(); };
+
+    ROOT.querySelectorAll('.item-row').forEach(function(row){
+      const id=row.dataset.itemId; const item=f.items.find(function(i){return i.id===id;});
+      row.querySelectorAll('[data-status]').forEach(function(btn){ btn.onclick=function(){ item.status=btn.dataset.status; render(); }; });
+      const note=row.querySelector('[data-note]'); if(note) note.oninput=function(){ item.note=note.value; };
+      const rm=row.querySelector('[data-remove]'); if(rm) rm.onclick=function(){ f.items=f.items.filter(function(i){return i.id!==id;}); render(); };
+    });
+
+    const addInline=document.getElementById('add-inline-item');
+    if(addInline) addInline.onclick=function(){
+      const inp=document.getElementById('new-item-text'); const v=inp.value.trim();
+      if(!v){ showToast('متن آیتم را وارد کنید'); return; }
+      f.items.push({id:uid(),text:v,status:null,note:''}); render();
+    };
+
+    const submitBtn=document.getElementById('submit-form');
+    if(submitBtn) submitBtn.onclick=async function(){
+      submitBtn.disabled=true; submitBtn.textContent='در حال ثبت…';
+      const user=state.users.find(function(u){return u.id===f.userId;});
+      const nfn=nextFormNo(f.jy,f.jm);
+      const record={
+        id:uid(), no:nfn.no, period:nfn.period,
+        jdate:{jy:f.jy,jm:f.jm,jd:f.jd},
+        inspector:{name:user.name, unit:user.unit, ip:user.ip, ext:user.ext},
+        items:f.items.map(function(i){return {text:i.text,status:i.status,note:i.note};}),
+        overallNotes:f.overallNotes.trim(),
+        savedAt:new Date().toISOString(),
+      };
+      state.submissions.push(record);
+      const ok=await saveJSON('submissions', state.submissions);
+      if(ok){ f.submitted=record; showToast('فرم بازرسی با موفقیت ذخیره شد'); }
+      else{ state.submissions.pop(); }
+      render();
+    };
+  }
+
+  const startNew=document.getElementById('start-new');
+  if(startNew) startNew.onclick=function(){ state.form=freshForm(); render(); };
+
+  if(state.tab==='manage'){
+    ROOT.querySelectorAll('[data-tpl-id]').forEach(function(row){
+      const id=row.dataset.tplId;
+      const idx=state.template.findIndex(function(t){return t.id===id;});
+      const up=row.querySelector('[data-move="up"]'); const down=row.querySelector('[data-move="down"]');
+      const del=row.querySelector('[data-del-tpl]');
+      if(up) up.onclick=async function(){ if(idx>0){ const tmp=state.template[idx-1]; state.template[idx-1]=state.template[idx]; state.template[idx]=tmp; await saveJSON('template-items',state.template); syncFormItemsFromTemplate(); render(); } };
+      if(down) down.onclick=async function(){ if(idx<state.template.length-1){ const tmp=state.template[idx+1]; state.template[idx+1]=state.template[idx]; state.template[idx]=tmp; await saveJSON('template-items',state.template); syncFormItemsFromTemplate(); render(); } };
+      if(del) del.onclick=async function(){ state.template=state.template.filter(function(t){return t.id!==id;}); await saveJSON('template-items',state.template); syncFormItemsFromTemplate(); showToast('آیتم حذف شد'); render(); };
+    });
+    const addTpl=document.getElementById('add-tpl-item');
+    if(addTpl) addTpl.onclick=async function(){
+      const inp=document.getElementById('new-tpl-text'); const v=inp.value.trim();
+      if(!v){ showToast('متن آیتم را وارد کنید'); return; }
+      state.template.push({id:uid(),text:v}); await saveJSON('template-items',state.template);
+      syncFormItemsFromTemplate();
+      showToast('آیتم به لیست استاندارد و به فرم جاری اضافه شد'); render();
+    };
+  }
+
+  if(state.tab==='users'){
+    ROOT.querySelectorAll('[data-user-id]').forEach(function(row){
+      const id=row.dataset.userId; const del=row.querySelector('[data-del-user]');
+      if(del) del.onclick=async function(){
+        state.users=state.users.filter(function(u){return u.id!==id;}); await saveJSON('users',state.users);
+        showToast('کاربر حذف شد'); render();
+      };
+    });
+    const addUser=document.getElementById('add-user');
+    if(addUser) addUser.onclick=async function(){
+      const name=document.getElementById('nu-name').value.trim();
+      const unit=document.getElementById('nu-unit').value.trim();
+      const ip=document.getElementById('nu-ip').value.trim();
+      const ext=document.getElementById('nu-ext').value.trim();
+      if(!name){ showToast('نام کاربر را وارد کنید'); return; }
+      state.users.push({id:uid(),name:name,unit:unit,ip:ip,ext:ext});
+      await saveJSON('users', state.users);
+      showToast('کاربر اضافه شد'); render();
+    };
+  }
+
+  if(state.tab==='history'){
+    if(!state.historyPinHash){
+      const save=document.getElementById('pin-save');
+      if(save) save.onclick=async function(){
+        const p1=document.getElementById('pin-new').value.trim();
+        const p2=document.getElementById('pin-confirm').value.trim();
+        if(p1.length<4){ state.pinError='رمز باید حداقل ۴ رقم باشد.'; render(); return; }
+        if(p1!==p2){ state.pinError='رمزها یکسان نیستند.'; render(); return; }
+        state.historyPinHash=simpleHash(p1);
+        await saveJSON('history-pin-hash', state.historyPinHash);
+        state.historyUnlocked=true; state.pinError=''; showToast('رمز عبور تنظیم شد');
+        render();
+      };
+    } else if(!state.historyUnlocked){
+      const unlock=document.getElementById('pin-unlock');
+      const tryPin=function(){
+        const p=document.getElementById('pin-try').value.trim();
+        if(simpleHash(p)===state.historyPinHash){ state.historyUnlocked=true; state.pinError=''; render(); }
+        else{ state.pinError='رمز اشتباه است.'; render(); }
+      };
+      if(unlock) unlock.onclick=tryPin;
+      const pinInput=document.getElementById('pin-try');
+      if(pinInput) pinInput.onkeydown=function(e){ if(e.key==='Enter') tryPin(); };
+    } else {
+      const filt=document.getElementById('hist-filter');
+      if(filt) filt.oninput=function(){ state.historyFilter=filt.value; render(); };
+      ROOT.querySelectorAll('[data-toggle]').forEach(function(h){
+        h.onclick=function(){ const id=h.dataset.toggle; state.expandedSub = state.expandedSub===id ? null : id; render(); };
+      });
+      ROOT.querySelectorAll('[data-del-sub]').forEach(function(b){
+        b.onclick=async function(e){
+          e.stopPropagation();
+          const id=b.dataset.delSub;
+          if(!confirm('این رکورد بازرسی حذف شود؟ این عمل قابل بازگشت نیست.')) return;
+          state.submissions=state.submissions.filter(function(s){return s.id!==id;});
+          await saveJSON('submissions', state.submissions);
+          state.expandedSub=null; showToast('رکورد حذف شد'); render();
+        };
+      });
+      const lockAgain=document.getElementById('lock-again');
+      if(lockAgain) lockAgain.onclick=function(){ state.historyUnlocked=false; render(); };
+      const changePinBtn=document.getElementById('change-pin');
+      if(changePinBtn) changePinBtn.onclick=function(){ state.pinScreen = state.pinScreen==='change'?null:'change'; state.pinError=''; render(); };
+      const cpSave=document.getElementById('cp-save');
+      if(cpSave) cpSave.onclick=async function(){
+        const oldP=document.getElementById('cp-old').value.trim();
+        const newP=document.getElementById('cp-new').value.trim();
+        if(simpleHash(oldP)!==state.historyPinHash){ state.pinError='رمز فعلی اشتباه است.'; render(); return; }
+        if(newP.length<4){ state.pinError='رمز جدید باید حداقل ۴ رقم باشد.'; render(); return; }
+        state.historyPinHash=simpleHash(newP);
+        await saveJSON('history-pin-hash', state.historyPinHash);
+        state.pinScreen=null; state.pinError=''; showToast('رمز عبور تغییر کرد'); render();
+      };
+
+      const exportBtn=document.getElementById('export-backup');
+      if(exportBtn) exportBtn.onclick=function(){
+        const backup={
+          app:'inspection-form-backup', version:1, exportedAt:new Date().toISOString(),
+          template:state.template, users:state.users, submissions:state.submissions,
+          historyPinHash:state.historyPinHash,
+        };
+        const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        const t=todayJalali();
+        a.href=url; a.download='inspection-backup-'+t.jy+'-'+String(t.jm).padStart(2,'0')+'-'+String(t.jd).padStart(2,'0')+'.json';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        showToast('نسخه پشتیبان دانلود شد');
+      };
+
+      const importInput=document.getElementById('import-backup');
+      if(importInput) importInput.onchange=function(){
+        const file=importInput.files[0];
+        if(!file) return;
+        const reader=new FileReader();
+        reader.onload=async function(){
+          try{
+            const data=JSON.parse(reader.result);
+            if(!data || data.app!=='inspection-form-backup') throw new Error('invalid');
+            if(!confirm('بازیابی از فایل پشتیبان، تمام اطلاعات فعلی (کاربران، آیتم‌ها، تاریخچه) را جایگزین می‌کند. ادامه می‌دهید؟')) return;
+            state.template = data.template || [];
+            state.users = data.users || [];
+            state.submissions = data.submissions || [];
+            state.historyPinHash = data.historyPinHash || null;
+            await saveJSON('template-items', state.template);
+            await saveJSON('users', state.users);
+            await saveJSON('submissions', state.submissions);
+            if(state.historyPinHash) await saveJSON('history-pin-hash', state.historyPinHash);
+            state.form = freshForm();
+            showToast('اطلاعات با موفقیت بازیابی شد');
+            render();
+          }catch(e){
+            showToast('فایل پشتیبان معتبر نیست');
+          }
+        };
+        reader.readAsText(file);
+      };
+    }
+  }
+}
+
+init();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+</script>
+</body>
+</html>
