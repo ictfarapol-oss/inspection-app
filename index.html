@@ -57,6 +57,7 @@
   .serial-box{display:flex;align-items:center;justify-content:space-between;background:var(--steel-tint);border:1px dashed var(--steel);border-radius:8px;padding:9px 13px;margin-bottom:16px;font-size:12.5px;}
   .serial-box b{color:var(--steel);font-family:'JetBrains Mono',monospace;font-size:13px;}
 
+  .form-code{white-space:pre;direction:ltr;unicode-bidi:isolate;}
   .jdate-row{display:flex;gap:8px;align-items:center;}
   .jdate-row select{flex:1;}
   .btn-today{flex:0 0 auto;}
@@ -157,6 +158,7 @@
 
 <script>
 const ROOT = document.getElementById('root');
+const FORM_CODE = 'POL-F-713-02        rev.05';
 
 /* ---------- helpers ---------- */
 function toFa(n){const d=['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];return String(n).replace(/[0-9]/g,x=>d[x]);}
@@ -340,7 +342,7 @@ function newFormHTML(){
   const years=[]; const ty=todayJalali().jy; for(let y=ty-1;y<=ty+1;y++) years.push(y);
 
   let html='<div class="card"><h2>مشخصات بازرسی</h2><p class="hint">اطلاعات کلی این دوره بازرسی را وارد کنید.</p>'+
-    '<div class="serial-box"><span>شماره فرم</span><b class="mono">'+no+'</b></div>'+
+    '<div class="serial-box"><span>شماره فرم</span><b class="mono form-code">'+FORM_CODE+'</b></div>'+
     '<div class="field-grid">'+
       '<div class="full"><label>کاربر</label><select id="f-user"><option value="">— انتخاب کنید —</option>'+
       state.users.map(function(u){return '<option value="'+u.id+'" '+(f.userId===u.id?'selected':'')+'>'+escapeHtml(u.name)+'</option>';}).join('')+
@@ -394,7 +396,7 @@ function submittedHTML(){
   const s=state.form.submitted;
   const c=countStatuses(s.items);
   return '<div class="card done-panel"><h2>فرم با موفقیت ثبت شد ✅</h2>'+
-    '<p>شماره فرم: <b class="mono">'+s.no+'</b> — '+jalaliLabel(s.jdate)+'</p>'+
+    '<p>شماره فرم: <b class="mono form-code">'+FORM_CODE+'</b><br>'+jalaliLabel(s.jdate)+'</p>'+
     '<div class="stamp"><svg viewBox="0 0 150 150">'+
       '<circle cx="75" cy="75" r="70" fill="none" stroke="#2F6F63" stroke-width="3"/>'+
       '<circle cx="75" cy="75" r="60" fill="none" stroke="#2F6F63" stroke-width="1.5" stroke-dasharray="3 4"/></svg>'+
